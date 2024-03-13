@@ -1,6 +1,8 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -10,21 +12,20 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.security.Principal;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class AdminController {
 
     private final UserService userService;
     private final RoleService roleService;
 
-    @GetMapping("/admin")
-    public String admin(ModelMap map, Principal principal) {
-        map.addAttribute("users", userService.findAll());
+    @GetMapping("/userInfo")
+    public ResponseEntity<User> admin(Principal principal) {
         User userSession = userService.findByUsername(principal.getName());
-        map.addAttribute("person", userSession);
-        map.addAttribute("roles", roleService.findAll());
-        return "admin";
+        return new ResponseEntity<>(userSession, HttpStatus.OK);
     }
+
+    @GetMapping("/allUsers") //todo реализовать метод получения всех пользователей
 
     @PostMapping("/create")
     public String create(@ModelAttribute("user") User user,
