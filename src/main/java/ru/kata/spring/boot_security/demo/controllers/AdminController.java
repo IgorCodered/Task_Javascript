@@ -11,8 +11,10 @@ import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class AdminController {
 
@@ -25,7 +27,10 @@ public class AdminController {
         return new ResponseEntity<>(userSession, HttpStatus.OK);
     }
 
-    @GetMapping("/allUsers") //todo реализовать метод получения всех пользователей
+    @GetMapping("/allUsers")
+    public ResponseEntity<List<User>> allUser() {
+        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
+    }
 
     @PostMapping("/create")
     public String create(@ModelAttribute("user") User user,

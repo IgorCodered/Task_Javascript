@@ -1,4 +1,4 @@
-const aboutUserInfo = "/userInfo";
+const aboutUserInfo = "api/userInfo";
 
 fetch(aboutUserInfo)
     .then(response => response.json())
