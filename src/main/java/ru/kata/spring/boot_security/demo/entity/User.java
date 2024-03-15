@@ -1,22 +1,27 @@
 package ru.kata.spring.boot_security.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
 @Table(name = "users")
 @NoArgsConstructor
-public class User implements UserDetails {
+public class User implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,17 +45,13 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "age")
-    private int age;
-
     public User(String firstName, String lastName,
-                String email, String password, int age, Set<Role> roles) {
+                String email, String password, Set<Role> roles) {
         this.username = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.age = age;
         this.roles = roles;
     }
 
@@ -63,7 +64,7 @@ public class User implements UserDetails {
     @Override
     @Transactional
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
 
     @Override

@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const tableBody = document.getElementById('bodyAllUserTable')
+    const tableBody = document.getElementById('bodyAllUserTable');
+    const editModal = new bootstrap.Modal(document.getElementById('edit'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('delete'));
 
     function createTableRow(user) {
         const row = document.createElement('tr');
@@ -55,6 +57,116 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Ошибка получения данных пользователей:', error);
         })
+
+    function fillEditModal(user) {
+        const idEdit = document.getElementById('idEdit');
+        const nameEdit = document.getElementById('nameEdit');
+        const surnameEdit = document.getElementById('surnameEdit');
+        const emailEdit = document.getElementById('emailEdit');
+        const passwordEdit = document.getElementById('passwordEdit');
+        const editRolesUser = document.getElementById('editRolesUser');
+
+        idEdit.value = user.id;
+        nameEdit.value = user.firstName;
+        surnameEdit.value = user.lastName;
+        emailEdit.value = user.email;
+        editRolesUser.innerHTML = '';
+
+        user.roles.forEach(role => {
+            const option = document.createElement('option');
+            option.value = role.name;
+            option.textContent = role.name;
+            editRolesUser.appendChild(option);
+        });
+    }
+
+    function fillDeleteModal(user) {
+        const deleteID = document.getElementById('deleteID');
+        const nameDelete = document.getElementById('nameDelete');
+        const surnameDelete = document.getElementById('surnameDelete');
+        const emailDelete = document.getElementById('emailDelete');
+        const deleteRolesUser = document.getElementById('deleteRolesUser');
+
+        deleteID.value = user.id;
+        nameDelete.value = user.firstName;
+        surnameDelete.value = user.lastName;
+        emailDelete.value = user.email;
+        deleteRolesUser.value = user.roles;
+    }
+
+    tableBody.addEventListener('click', function (event) {
+
+        const target = event.target;
+        if (target.tagName === 'BUTTON' && target.classList.contains('btn-primary')) {
+            const selectedRow = target.closest('tr');
+            const userId = selectedRow.cells[0].textContent;
+
+            fetch(`api/find/${userId}`)
+                .then(response => response.json())
+                .then(user => {
+                    fillEditModal(user);
+                    editModal.show();
+                })
+                .catch(error => {
+                    console.error('Ошибка получения данных пользователя:', error);
+                });
+
+            const editButton = document.getElementById('editButton');
+            editButton.addEventListener('click', function () {
+                const form = document.getElementById('formEditUser');
+                const formData = new FormData(form);
+
+                fetch(`api/edit/`, {
+                    method: 'PUT',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        $('#edit').modal('hide');
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при редактировании пользователя:', error);
+                    });
+            })
+        }
+    });
+
+    tableBody.addEventListener('click', function (event) {
+        const target = event.target;
+
+        if (target.tagName === 'BUTTON' && target.classList.contains('btn-danger')) {
+            const selectedRow = target.closest('tr');
+            const userId = selectedRow.cells[0].textContent;
+
+            fetch(`api/find/${userId}`)
+                .then(response => response.json())
+                .then(user => {
+                    fillDeleteModal(user);
+                    deleteModal.show();
+                })
+                .catch(error => {
+                    console.error('Ошибка получения данных пользователя:', error);
+                })
+
+            const deleteButton = document.getElementById('deleteUserButton');
+            deleteButton.addEventListener('click', function () {
+                fetch(`api/delete/${userId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            $('#deleteModal').modal('hide');
+                        } else {
+                            console.error('Ошибка при удалении пользователя:', response.status);
+                        }
+                    })
+                    .catch(error => console.error('Ошибка при удалении пользователя:', error));
+            });
+        }
+    })
 })
+
 
 

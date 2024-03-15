@@ -8,6 +8,7 @@ import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -54,7 +55,6 @@ public class UserServiceImpl implements UserService {
         userToBeUpdated.setFirstName(user.getFirstName());
         userToBeUpdated.setLastName(user.getLastName());
         userToBeUpdated.setPassword(passwordEncoder.encode(user.getPassword()));
-        userToBeUpdated.setAge(user.getAge());
         userToBeUpdated.setRoles(user.getRoles());
         userToBeUpdated.setEmail(user.getEmail());
         userToBeUpdated.setUsername(user.getEmail());
@@ -64,6 +64,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
 }

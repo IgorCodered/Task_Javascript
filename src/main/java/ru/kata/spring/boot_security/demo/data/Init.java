@@ -32,10 +32,10 @@ public class Init {
         role.add(roleUser);
 
         User admin = new User("Igor", "Elesin", "igor@mail.ru",
-                "100", 27, role);
+                "100", role);
 
         User user = new User("Anton", "Nazarov", "anton@mail.ru",
-                "100", 25, role);
+                "100", role);
 
         userService.saveUser(admin, roleAdmin.toString());
         userService.saveUser(user, roleUser.toString());
