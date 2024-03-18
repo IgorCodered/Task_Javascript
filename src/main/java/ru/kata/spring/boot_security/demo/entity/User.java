@@ -1,27 +1,24 @@
 package ru.kata.spring.boot_security.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Data
 @Table(name = "users")
 @NoArgsConstructor
-public class User implements Serializable, UserDetails {
+@AllArgsConstructor
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,35 +34,24 @@ public class User implements Serializable, UserDetails {
     @Column(name = "lastName")
     private String lastName;
 
-    @Email
-    @NotEmpty(message = "Заполните строку email")
     @Column(name = "email")
     private String email;
 
     @Column(name = "password")
     private String password;
 
-    public User(String firstName, String lastName,
-                String email, String password, Set<Role> roles) {
-        this.username = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.roles = roles;
-    }
-
     @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+    private Collection<Role> roles;
 
     @Override
-    @Transactional
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
+        return roles != null ? new HashSet<>(roles) : Collections.emptySet();
     }
+
 
     @Override
     public String getPassword() {
@@ -74,7 +60,7 @@ public class User implements Serializable, UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;
+        return getEmail();
     }
 
     @Override

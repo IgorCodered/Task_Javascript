@@ -7,9 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -21,7 +20,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public List<User> findAll() {
+    public Collection<User> findAll() {
         return userRepository.findAll();
     }
 
@@ -39,11 +38,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void saveUser(User user, String role) {
-        if (role != null && roleService.findRoleByName(role) != null) {
-            user.setRoles(Set.of(roleService.findRoleByName(role)));
-        } else {
-            user.setRoles(Set.of(roleService.findRoleByName("ROLE_USER")));
-        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }

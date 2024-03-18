@@ -1,172 +1,232 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const tableBody = document.getElementById('bodyAllUserTable');
-    const editModal = new bootstrap.Modal(document.getElementById('edit'));
-    const deleteModal = new bootstrap.Modal(document.getElementById('delete'));
+$(async function () {
+    await allUsers();
+    await newUser();
+    deleteUser();
+    editCurrentUser();
+});
 
-    function createTableRow(user) {
-        const row = document.createElement('tr');
-
-        const idCell = document.createElement('td');
-        idCell.textContent = user.id;
-        row.appendChild(idCell);
-
-        const firstNameCell = document.createElement('td');
-        firstNameCell.textContent = user.firstName;
-        row.appendChild(firstNameCell);
-
-        const lastNameCell = document.createElement('td');
-        lastNameCell.textContent = user.lastName;
-        row.appendChild(lastNameCell);
-
-        const emailCell = document.createElement('td');
-        emailCell.textContent = user.email;
-        row.appendChild(emailCell);
-
-        const role = user.roles.length > 0 ? user.roles[0].name : '';
-        const roleCell = document.createElement('td');
-        roleCell.textContent = role;
-        row.appendChild(roleCell);
-
-        const editButton = document.createElement('button');
-        editButton.classList.add('btn', 'btn-primary');
-        editButton.textContent = 'Edit';
-
-        const deleteButton = document.createElement('button');
-        deleteButton.classList.add('btn', 'btn-danger');
-        deleteButton.textContent = 'Delete';
-
-        const buttonCell = document.createElement('td');
-        buttonCell.appendChild(editButton);
-        row.appendChild(buttonCell);
-
-        const buttonCell1 = document.createElement('td');
-        buttonCell1.appendChild(deleteButton);
-        row.appendChild(buttonCell1);
-
-        return row;
-    }
-
-    fetch('api/allUsers')
-        .then(response => response.json())
-        .then(users => {
-            users.forEach(user => {
-                const tableRow = createTableRow(user);
-                tableBody.appendChild(tableRow);
-            });
-        })
-        .catch(error => {
-            console.error('Ошибка получения данных пользователей:', error);
-        })
-
-    function fillEditModal(user) {
-        const idEdit = document.getElementById('idEdit');
-        const nameEdit = document.getElementById('nameEdit');
-        const surnameEdit = document.getElementById('surnameEdit');
-        const emailEdit = document.getElementById('emailEdit');
-        const passwordEdit = document.getElementById('passwordEdit');
-        const editRolesUser = document.getElementById('editRolesUser');
-
-        idEdit.value = user.id;
-        nameEdit.value = user.firstName;
-        surnameEdit.value = user.lastName;
-        emailEdit.value = user.email;
-        editRolesUser.innerHTML = '';
-
-        user.roles.forEach(role => {
-            const option = document.createElement('option');
-            option.value = role.name;
-            option.textContent = role.name;
-            editRolesUser.appendChild(option);
-        });
-    }
-
-    function fillDeleteModal(user) {
-        const deleteID = document.getElementById('deleteID');
-        const nameDelete = document.getElementById('nameDelete');
-        const surnameDelete = document.getElementById('surnameDelete');
-        const emailDelete = document.getElementById('emailDelete');
-        const deleteRolesUser = document.getElementById('deleteRolesUser');
-
-        deleteID.value = user.id;
-        nameDelete.value = user.firstName;
-        surnameDelete.value = user.lastName;
-        emailDelete.value = user.email;
-        deleteRolesUser.value = user.roles;
-    }
-
-    tableBody.addEventListener('click', function (event) {
-
-        const target = event.target;
-        if (target.tagName === 'BUTTON' && target.classList.contains('btn-primary')) {
-            const selectedRow = target.closest('tr');
-            const userId = selectedRow.cells[0].textContent;
-
-            fetch(`api/find/${userId}`)
-                .then(response => response.json())
-                .then(user => {
-                    fillEditModal(user);
-                    editModal.show();
-                })
-                .catch(error => {
-                    console.error('Ошибка получения данных пользователя:', error);
-                });
-
-            const editButton = document.getElementById('editButton');
-            editButton.addEventListener('click', function () {
-                const form = document.getElementById('formEditUser');
-                const formData = new FormData(form);
-
-                fetch(`api/edit/`, {
-                    method: 'PUT',
-                    body: formData
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        $('#edit').modal('hide');
-                    })
-                    .catch(error => {
-                        console.error('Ошибка при редактировании пользователя:', error);
-                    });
+async function allUsers() {
+    const table = $('#bodyAllUserTable');
+    table.empty()
+    fetch("/api/allUsers")
+        .then(r => r.json())
+        .then(data => {
+            data.forEach(user => {
+                let users = `$(
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.firstName}</td>
+                            <td>${user.lastName}</td>
+                            <td>${user.email}</td>
+                            <td>${user.roles.map(role => " " + role.name.substring(5))}</td>
+                            <td>
+                                <button type="button" class="btn btn-info" data-toggle="modal" id="buttonEdit" data-action="edit" data-id="${user.id}" data-target="#edit">Edit</button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" id="buttonDelete" data-action="delete" data-id="${user.id}" data-target="#delete">Delete</button>
+                            </td>
+                        </tr>)`;
+                table.append(users);
             })
+        })
+        .catch((error) => {
+            alert(error);
+        })
+}
+
+async function newUser() {
+    await fetch("/api/allRoles")
+        .then(r => r.json())
+        .then(roles => {
+            roles.forEach(role => {
+                let element = document.createElement("option");
+                element.text = role.name.substring(5);
+                element.value = role.id;
+                $('#rolesNewUser')[0].appendChild(element);
+            })
+        })
+
+    const formAddNewUser = document.forms["formAddNewUser"];
+
+    formAddNewUser.addEventListener('submit', function (event) {
+        event.preventDefault();
+        let rolesNewUser = [];
+        for (let i = 0; i < formAddNewUser.roles.options.length; i++) {
+            if (formAddNewUser.roles.options[i].selected) {
+                rolesNewUser.push({
+                    id: formAddNewUser.roles.options[i].value,
+                    name: formAddNewUser.roles.options[i].text
+                });
+            }
         }
-    });
 
-    tableBody.addEventListener('click', function (event) {
-        const target = event.target;
+        fetch("/api/create", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: formAddNewUser.email.value,
+                firstName: formAddNewUser.name.value,
+                lastName: formAddNewUser.surname.value,
+                email: formAddNewUser.email.value,
+                password: formAddNewUser.password.value,
+                roles: rolesNewUser
+            })
+        }).then(() => {
+            formAddNewUser.reset();
+            allUsers();
+            $('#allUsersTable').click();
+        })
+            .catch((error) => {
+                alert(error);
+            })
+    })
 
-        if (target.tagName === 'BUTTON' && target.classList.contains('btn-danger')) {
-            const selectedRow = target.closest('tr');
-            const userId = selectedRow.cells[0].textContent;
+}
 
-            fetch(`api/find/${userId}`)
-                .then(response => response.json())
-                .then(user => {
-                    fillDeleteModal(user);
-                    deleteModal.show();
-                })
-                .catch(error => {
-                    console.error('Ошибка получения данных пользователя:', error);
-                })
-
-            const deleteButton = document.getElementById('deleteUserButton');
-            deleteButton.addEventListener('click', function () {
-                fetch(`api/delete/${userId}`, {
-                    method: 'DELETE'
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            $('#deleteModal').modal('hide');
-                        } else {
-                            console.error('Ошибка при удалении пользователя:', response.status);
-                        }
-                    })
-                    .catch(error => console.error('Ошибка при удалении пользователя:', error));
+function deleteUser() {
+    const deleteForm = document.forms["formDeleteUser"];
+    deleteForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        fetch("api/delete/" + deleteForm.id.value, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(() => {
+                $('#deleteFormCloseButton').click();
+                allUsers();
+            })
+            .catch((error) => {
+                alert(error);
             });
-        }
+    })
+}
+
+
+$(document).ready(function () {
+    $('#delete').on("show.bs.modal", function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data("id");
+        viewDeleteModal(id);
     })
 })
 
+async function viewDeleteModal(id) {
+    let userDelete = await getUser(id);
+    let formDelete = document.forms["formDeleteUser"];
+    formDelete.id.value = userDelete.id;
+    formDelete.name.value = userDelete.firstName;
+    formDelete.surname.value = userDelete.lastName;
+    formDelete.email.value = userDelete.email;
 
+    $('#deleteRolesUser').empty();
 
+    await fetch("/api/allRoles")
+        .then(r => r.json())
+        .then(roles => {
+            roles.forEach(role => {
+                let selectedRole = false;
+                for (let i = 0; i < userDelete.roles.length; i++) {
+                    if (userDelete.roles[i].name === role.name) {
+                        selectedRole = true;
+                        break;
+                    }
+                }
+                let element = document.createElement("option");
+                element.text = role.name.substring(5);
+                element.value = role.id;
+                if (selectedRole) element.selected = true;
+                $('#deleteRolesUser')[0].appendChild(element);
+            })
+        })
+        .catch((error) => {
+            alert(error);
+        })
+}
+
+async function getUser(id) {
+
+    let url = "/api/find/" + id;
+    let response = await fetch(url);
+    return await response.json();
+}
+
+function editCurrentUser() {
+    const editForm = document.forms["formEditUser"];
+    editForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        let editUserRoles = [];
+        for (let i = 0; i < editForm.roles.options.length; i++) {
+            if (editForm.roles.options[i].selected) editUserRoles.push({
+                id: editForm.roles.options[i].value,
+                name: editForm.roles.options[i].name
+            })
+        }
+
+        fetch("/api/edit/", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: editForm.id.value,
+                firstName: editForm.name.value,
+                lastName: editForm.surname.value,
+                email: editForm.email.value,
+                password: editForm.password.value,
+                roles: editUserRoles
+            })
+        }).then(() => {
+            $('#editFormCloseButton').click();
+            allUsers();
+        })
+            .catch((error) => {
+                alert(error);
+            })
+    })
+}
+
+$(document).ready(function () {
+    $('#edit').on("show.bs.modal", function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data("id");
+        viewEditModal(id);
+    })
+})
+
+async function viewEditModal(id) {
+    let userEdit = await getUser(id);
+    let form = document.forms["formEditUser"];
+    form.id.value = userEdit.id;
+    form.name.value = userEdit.firstName;
+    form.surname.value = userEdit.lastName;
+    form.email.value = userEdit.email;
+    form.password.value = userEdit.password;
+
+    $('#editRolesUser').empty();
+
+    await fetch("api/allRoles")
+        .then(r => r.json())
+        .then(roles => {
+            roles.forEach(role => {
+                let selectedRole = false;
+                for (let i = 0; i < userEdit.roles.length; i++) {
+                    if (userEdit.roles[i].name === role.name) {
+                        selectedRole = true;
+                        break;
+                    }
+                }
+                let element = document.createElement("option");
+                element.text = role.name.substring(5);
+                element.value = role.id;
+                if (selectedRole) element.selected = true;
+                $('#editRolesUser')[0].appendChild(element);
+            })
+        })
+        .catch((error) => {
+            alert(error);
+        })
+}

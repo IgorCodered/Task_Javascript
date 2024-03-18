@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 
 <head>
     <meta charset="UTF-8">
@@ -9,17 +9,24 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js"
+            integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2"
+            crossorigin="anonymous"></script>
 
-    <script type="text/javascript" src="admin.js"></script>
-    <script type="text/javascript" src="user.js"></script>
 
+    <script type="text/javascript" src="/infoUser.js"></script>
+    <script type="text/javascript" src="/user.js"></script>
 
 </head>
 <body>
 <header>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="  collapse navbar-collapse">
             <ul class="navbar-nav mr-auto" id="user">
@@ -46,7 +53,7 @@
         <div class="col-md-2" style="padding-left: 0; padding-right: 0; padding-top: 25px">
             <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                 <a class="nav-link active" id="v-pills-admin-tab" data-toggle="pill" href="#adminPanel" role="tab"
-                   aria-controls="v-pills-admin" aria-selected="true">Admin</a>
+                   aria-controls="v-pills-admin" aria-selected="true" sec:authorize="hasRole('ROLE_ADMIN')">Admin</a>
                 <a class="nav-link" id="v-pills-user-tab" data-toggle="pill" href="#userPanel" role="tab"
                    aria-controls="v-pills-user" aria-selected="false">User</a>
             </div>
@@ -54,7 +61,7 @@
         <div class="col-md-10 bg-light" style="padding-left: 15px; padding-right: 0; padding-top: 25px">
             <div class="tab-content" id="v-pills-tabContent">
                 <div class="tab-pane fade show active" id="adminPanel" role="tabpanel"
-                     aria-labelledby="v-pills-admin-tab">
+                     aria-labelledby="v-pills-admin-tab" sec:authorize="hasRole('ROLE_ADMIN')">
                     <h1>Admin panel</h1>
                     <ul class="nav nav-tabs">
                         <li class="nav-item">
@@ -125,7 +132,7 @@
                                                         <div class="form-group text-center">
                                                             <label for="passwordAdd"
                                                                    class="font-weight-bold">Password</label>
-                                                            <input type="text" class="form-control" name="password"
+                                                            <input type="password" class="form-control" name="password"
                                                                    id="passwordAdd" placeholder="password"/>
                                                         </div>
 
@@ -195,7 +202,7 @@
                     </div>
                     <div class="form-group text-center">
                         <label for="nameEdit" class="font-weight-bold">First name</label>
-                        <input class="form-control form-control-sm" id="nameEdit" name="firstname"
+                        <input class="form-control form-control-sm" id="nameEdit" name="name"
                                type="text">
                     </div>
                     <div class="form-group text-center">
@@ -215,7 +222,7 @@
                     </div>
                     <div class="form-group text-center">
                         <label for="editRolesUser" class="font-weight-bold">Role</label>
-                        <select class="form-control" name="roles" id="editRolesUser" size="2" multiple required>
+                        <select class="form-control" name="roles" id="editRolesUser" size="2" multiple>
                         </select>
                     </div>
                 </div>
@@ -245,17 +252,17 @@
                 <div class="modal-body" style="padding-left: 120px; padding-right: 120px;">
                     <div class="form-group text-center">
                         <label for="deleteID" class="font-weight-bold">ID</label>
-                        <input class="form-control form-control-sm" id="deleteID" name="id" readonly
+                        <input class="form-control form-control-sm" id="deleteID" name="id" readonly th:value="*{id}"
                                type="text">
                     </div>
                     <div class="form-group text-center">
                         <label for="nameDelete" class="font-weight-bold">First name</label>
-                        <input class="form-control form-control-sm" id="nameDelete" name="firstName" readonly
+                        <input class="form-control form-control-sm" id="nameDelete" name="name" readonly th:value="*{name}"
                                type="text">
                     </div>
                     <div class="form-group text-center">
                         <label for="surnameDelete" class="font-weight-bold">Last name</label>
-                        <input class="form-control form-control-sm" id="surnameDelete" name="lastname" readonly
+                        <input class="form-control form-control-sm" id="surnameDelete" name="surname" readonly th:value="*{surname}"
                                type="text">
                     </div>
                     <div class="form-group text-center">

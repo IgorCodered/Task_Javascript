@@ -31,11 +31,13 @@ public class Init {
         role.add(roleAdmin);
         role.add(roleUser);
 
-        User admin = new User("Igor", "Elesin", "igor@mail.ru",
-                "100", role);
+//        User admin = new User("Igor", "Elesin", "igor@mail.ru",
+//                "100", role);
 
-        User user = new User("Anton", "Nazarov", "anton@mail.ru",
-                "100", role);
+        User admin = new User(1L, "admin@mail.ru","igor","elesin","admin@mail.ru","100", role);
+        User user = new User(2L, "user@mail.ru","igorUser","elesin","user@mail.ru","100", role);
+
+
 
         userService.saveUser(admin, roleAdmin.toString());
         userService.saveUser(user, roleUser.toString());

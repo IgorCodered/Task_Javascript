@@ -5,13 +5,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "role")
 @Data
 @NoArgsConstructor
-public class Role implements GrantedAuthority, Serializable {
+public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue
@@ -27,12 +26,12 @@ public class Role implements GrantedAuthority, Serializable {
 
     @Override
     public String getAuthority() {
-        return getName();
+        return this.name;
     }
 
     @Override
     public String toString() {
-        return getName();
+        return this.name;
     }
 
 }
