@@ -27,19 +27,21 @@ public class Init {
         roleService.saveRole(roleAdmin);
         roleService.saveRole(roleUser);
 
-        Set<Role> role = new HashSet<>();
-        role.add(roleAdmin);
-        role.add(roleUser);
+        Set<Role> adminRoles = new HashSet<>();
+        adminRoles.add(roleAdmin);
+
+        Set<Role> userRoles = new HashSet<>();
+        userRoles.add(roleUser);
 
 //        User admin = new User("Igor", "Elesin", "igor@mail.ru",
 //                "100", role);
 
-        User admin = new User(1L, "admin@mail.ru","igor","elesin","admin@mail.ru","100", role);
-        User user = new User(2L, "user@mail.ru","igorUser","elesin","user@mail.ru","100", role);
+        User admin = new User(1L, "admin@mail.ru","igor","elesin","admin@mail.ru","100", adminRoles);
+        User user = new User(2L, "user@mail.ru","igorUser","elesin","user@mail.ru","100", userRoles);
 
 
 
-        userService.saveUser(admin, roleAdmin.toString());
+        userService.saveUser(admin, adminRoles.toString());
         userService.saveUser(user, roleUser.toString());
     }
 }
