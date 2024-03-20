@@ -19,6 +19,6 @@ async function loadUser() {
             $('#userPanelBody').append(user);
         })
         .catch((error) => {
-            alert(error);
+            console.log(error)
         });
 }
